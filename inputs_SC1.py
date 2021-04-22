@@ -4,7 +4,7 @@ from nelson_siegel_svensson.calibrate import calibrate_ns_ols
 import matplotlib.pyplot as plt
 
 #data
-IR = pd.read_csv("inputs_IR_SC1.csv", sep = ";") #desetinna tecka, oddelovac ;
+IR = pd.read_csv("./dataset/inputs_IR_SC1.csv", sep = ";") #desetinna tecka, oddelovac ;
 
 IR.INV_INC = round(IR.INV_INC, 5) #zaokrouhleni
 IR.DISC_R = round(IR.DISC_R, 5)
