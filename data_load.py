@@ -33,6 +33,14 @@ df21 = pd.read_csv('./dataset/scen_10601-10900.csv')
 df22 = pd.read_csv('./dataset/scen_10901-11236.csv')
 # join them together
 df_total =  pd.concat([eval('df'+str(i+1)) for i in range(22)])
+
+# load and join NSS
+dfnss = pd.read_csv('./dataset/nss.csv')
+dfnss.drop(['Unnamed: 0'], axis='columns', inplace=True)
+
+df_total = pd.merge(df_total, dfnss, how='inner', left_on=['POL_NUM'], right_on=['scnum'])
+df_total.drop('scnum', axis='columns', inplace=True)
+
 #len(df_total) -->  98 605 188
 # changing column names to lower 
 df_total.columns = df_total.columns.str.lower()
