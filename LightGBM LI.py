@@ -62,7 +62,7 @@ cd = datetime.datetime(2020, 12, 31)
 df_total['inc_date_ct'] = df_total['inc_date'].apply(lambda x: datetime.datetime.strptime(x, '%d/%m/%Y'))
 df_total['cnt_months'] = df_total['inc_date_ct'].apply(lambda x: diff_month(x, cd))
 # drop all columns thay are not used
-df_total.drop([['inc_date', 'inc_date_ct', 'cv_ps_0']], axis = 1, inplace = True) 
+df_total.drop(['inc_date', 'inc_date_ct', 'cv_ps_0'], axis = 1, inplace = True) 
 
 
 
@@ -86,5 +86,9 @@ with open(r"./dataset/LLcvalue.pickle", "wb") as output_file:
 #    X_train, y_train, X_test, y_test = pickle.load(input_file)
 
 
-import lightgbm as lgb #pip3 install lightbm
+os.add_dll_directory('c:/Users/host/anaconda3/Lib/site-packages/lightgbm')
+os.add_dll_directory('c:/Users/host/anaconda3')
+os.add_dll_directory('c:/Users/host/anaconda3/lib')
+
+import lightgbm as lgb #pip3 install lightgbm
 
