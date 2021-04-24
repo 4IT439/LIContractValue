@@ -39,8 +39,8 @@ dfnss.drop(['Unnamed: 0'], axis='columns', inplace=True)
 # join them together, 500 rows
 df_total = pd.concat([eval('df'+str(i+1)+'.iloc[:50]') for i in range(20)])
 
-# join NSS
 df_total = pd.merge(df_total, dfnss, how='inner', left_on=['POL_NUM'], right_on=['scnum'])
+
 df_total.drop('scnum', axis='columns', inplace=True)
 
 #len(df_total) -->  98 605 188
@@ -65,8 +65,7 @@ df_total['cnt_months'] = df_total['inc_date_ct'].apply(lambda x: diff_month(x, c
 df_total.drop(['inc_date', 'inc_date_ct', 'cv_ps_0'], axis = 1, inplace = True) 
 
 
-
-# split train and test
+from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
 SEED = 500
@@ -82,13 +81,66 @@ with open(r"./dataset/LLcvalue.pickle", "wb") as output_file:
     pickle.dump([X_train, y_train, X_test, y_test], output_file) #dump
 #This file will be used in later scripts.
 #You can load the file containing variables [X_train, y_train, X_test, y_test]
-#with open(r"LLcvalue.pickle", "rb") as input_file:
-#    X_train, y_train, X_test, y_test = pickle.load(input_file)
+import pickle
+with open(r"./dataset/LLcvalue.pickle", "rb") as input_file:
+    X_train, y_train, X_test, y_test = pickle.load(input_file)
 
 
-os.add_dll_directory('c:/Users/host/anaconda3/Lib/site-packages/lightgbm')
-os.add_dll_directory('c:/Users/host/anaconda3')
-os.add_dll_directory('c:/Users/host/anaconda3/lib')
+import lightgbm as lgb #pip3 install lightbm
 
-import lightgbm as lgb #pip3 install lightgbm
+from sklearn.model_selection import GridSearchCV
+
+#%reset -f
+SEED = 500
+
+# Instantiate a lgb.LGBMRegressor
+lgbm0 = lgb.LGBMRegressor(seed=SEED)
+
+#Fit with SciKit
+lgbm0.fit(X_train, y_train)
+
+# Predict the test set labels 'y_pred0'
+y_pred0 = gbm0.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test0 = mean_squared_error(y_test, y_pred0, squared=False)
+print(rmse_test0)
+
+########################
+####Grid optimization###
+########################
+
+#setup params grid
+param_grid = {'learning_rate': [0.01,0.1,0.5], #alias eta, Step size shrinkage used in update to prevents overfitting.  
+    'n_estimators': [20, 50, 100],
+    'subsample': [0.5, 0.8, 1], #Subsample ratio of the training instances
+    'max_depth': [3, 5, 10],
+    'colsample_bytree': [0.5, 1] #colsample_bytree is the subsample ratio of columns when constructing each tree. Subsampling occurs once for every tree constructed.
+    }
+
+#instantiate XGBRegressor 
+lgbm = lgb.LGBMRegressor(seed=SEED)
+grid_mse = GridSearchCV(estimator=lgbm,
+                        param_grid=param_grid,
+                        scoring='neg_mean_squared_error', 
+                        cv=3, 
+                        verbose=1, 
+                        n_jobs=-1)
+#fit  GridSearchCV 
+tic = time.perf_counter() #begin timing
+grid_mse.fit(X_train, y_train)
+time_fit_cv = time.perf_counter() - tic #save timer
+
+print("Best parameters found: ",grid_mse.best_params_) #best_params_
+print("Lowest RMSE found: ", np.sqrt(np.abs(grid_mse.best_score_))) #best_score_
+
+#extract the estimator best_estimator_ 
+lgbm_ins = grid_mse.best_estimator_ #best_estimator_
+
+# Predict the test set labels 'y_pred'
+y_pred = lgbm_ins.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test = mean_squared_error(y_test, y_pred, squared=False)
+print(rmse_test)
 
