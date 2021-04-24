@@ -65,7 +65,6 @@ df_total['cnt_months'] = df_total['inc_date_ct'].apply(lambda x: diff_month(x, c
 df_total.drop(['inc_date', 'inc_date_ct', 'cv_ps_0'], axis = 1, inplace = True) 
 
 
-from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
 SEED = 500
@@ -86,9 +85,9 @@ with open(r"./dataset/LLcvalue.pickle", "rb") as input_file:
     X_train, y_train, X_test, y_test = pickle.load(input_file)
 
 
-import lightgbm as lgb #pip3 install lightbm
+from sklearn.metrics import mean_squared_error
 
-from sklearn.model_selection import GridSearchCV
+import lightgbm as lgb #pip3 install lightbm
 
 #%reset -f
 SEED = 500
@@ -100,7 +99,7 @@ lgbm0 = lgb.LGBMRegressor(seed=SEED)
 lgbm0.fit(X_train, y_train)
 
 # Predict the test set labels 'y_pred0'
-y_pred0 = gbm0.predict(X_test)
+y_pred0 = lgbm0.predict(X_test)
 
 # Evaluate the test set RMSE
 rmse_test0 = mean_squared_error(y_test, y_pred0, squared=False)
@@ -109,6 +108,8 @@ print(rmse_test0)
 ########################
 ####Grid optimization###
 ########################
+
+from sklearn.model_selection import GridSearchCV
 
 #setup params grid
 param_grid = {'learning_rate': [0.01,0.1,0.5], #alias eta, Step size shrinkage used in update to prevents overfitting.  
@@ -125,7 +126,48 @@ grid_mse = GridSearchCV(estimator=lgbm,
                         scoring='neg_mean_squared_error', 
                         cv=3, 
                         verbose=1, 
-                        n_jobs=-1)
+                        n_jobs=1)
+#fit  GridSearchCV 
+tic = time.perf_counter() #begin timing
+grid_mse.fit(X_train, y_train)
+time_fit_cv = time.perf_counter() - tic #save timer
+
+print("Best parameters found: ",grid_mse.best_params_) #best_params_
+print("Lowest RMSE found: ", np.sqrt(np.abs(grid_mse.best_score_))) #best_score_
+
+#extract the estimator best_estimator_ 
+lgbm_ins = grid_mse.best_estimator_ #best_estimator_
+
+# Predict the test set labels 'y_pred'
+y_pred = lgbm_ins.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test = mean_squared_error(y_test, y_pred, squared=False)
+print(rmse_test)
+
+
+###################################
+####Grid randomized optimization###
+###################################
+
+from sklearn.model_selection import RandomizedSearchCV
+
+#setup params grid
+param_grid = {'learning_rate': [0.01,0.1,0.5], #alias eta, Step size shrinkage used in update to prevents overfitting.  
+    'n_estimators': [20, 50, 100],
+    'subsample': [0.5, 0.8, 1], #Subsample ratio of the training instances
+    'max_depth': [3, 5, 10],
+    'colsample_bytree': [0.5, 1] #colsample_bytree is the subsample ratio of columns when constructing each tree. Subsampling occurs once for every tree constructed.
+    }
+
+#instantiate LGBMRegressor 
+lgbm = lgb.LGBMRegressor(seed=SEED)
+grid_mse = RandomizedSearchCV(estimator=lgbm,
+                        param_distributions=param_grid,
+                        scoring='neg_mean_squared_error', 
+                        cv=3, 
+                        verbose=1, 
+                        n_jobs=1)
 #fit  GridSearchCV 
 tic = time.perf_counter() #begin timing
 grid_mse.fit(X_train, y_train)
