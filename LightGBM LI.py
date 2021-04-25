@@ -10,30 +10,30 @@ import pickle
 
 
 # load all files
-df1 = pd.read_csv('./dataset/scen_0001-0200.csv').iloc[:1000]
-df2 = pd.read_csv('./dataset/scen_0201-0500.csv').iloc[:1000]
-df3 = pd.read_csv('./dataset/scen_0501-0700.csv').iloc[:1000]
-df4 = pd.read_csv('./dataset/scen_0701-1000.csv').iloc[:1000]
-df5 = pd.read_csv('./dataset/scen_1001-1300.csv').iloc[:1000]
-df6 = pd.read_csv('./dataset/scen_1301-1600.csv').iloc[:1000]
-df7 = pd.read_csv('./dataset/scen_1601-1900.csv').iloc[:1000]
-df8 = pd.read_csv('./dataset/scen_1901-2236.csv').iloc[:1000]
-df9 = pd.read_csv('./dataset/scen_6001-6300.csv').iloc[:1000]
-df10 = pd.read_csv('./dataset/scen_6301-6600.csv').iloc[:1000]
-df11 = pd.read_csv('./dataset/scen_6601-6900.csv').iloc[:1000]
-df12 = pd.read_csv('./dataset/scen_6901-7200.csv').iloc[:1000]
-df13 = pd.read_csv('./dataset/scen_7201-7500.csv').iloc[:1000]
-df14 = pd.read_csv('./dataset/scen_7501-7800.csv').iloc[:1000]
-df15 = pd.read_csv('./dataset/scen_7801-8236.csv').iloc[:1000]
-df16 = pd.read_csv('./dataset/scen_9001-9300.csv').iloc[:1000]
-df17 = pd.read_csv('./dataset/scen_9301-9700.csv').iloc[:1000]
-df18 = pd.read_csv('./dataset/scen_9701-10000.csv').iloc[:1000]
-df19 = pd.read_csv('./dataset/scen_10001-10300.csv').iloc[:1000]
-df20 = pd.read_csv('./dataset/scen_10301-10600.csv').iloc[:1000]
+df1 = pd.read_csv('scen_0001-0200.csv').iloc[:1000]
+df2 = pd.read_csv('scen_0201-0500.csv').iloc[:1000]
+df3 = pd.read_csv('scen_0501-0700.csv').iloc[:1000]
+df4 = pd.read_csv('scen_0701-1000.csv').iloc[:1000]
+df5 = pd.read_csv('scen_1001-1300.csv').iloc[:1000]
+df6 = pd.read_csv('scen_1301-1600.csv').iloc[:1000]
+df7 = pd.read_csv('scen_1601-1900.csv').iloc[:1000]
+df8 = pd.read_csv('scen_1901-2236.csv').iloc[:1000]
+df9 = pd.read_csv('scen_6001-6300.csv').iloc[:1000]
+df10 = pd.read_csv('scen_6301-6600.csv').iloc[:1000]
+df11 = pd.read_csv('scen_6601-6900.csv').iloc[:1000]
+df12 = pd.read_csv('scen_6901-7200.csv').iloc[:1000]
+df13 = pd.read_csv('scen_7201-7500.csv').iloc[:1000]
+df14 = pd.read_csv('scen_7501-7800.csv').iloc[:1000]
+df15 = pd.read_csv('scen_7801-8236.csv').iloc[:1000]
+df16 = pd.read_csv('scen_9001-9300.csv').iloc[:1000]
+df17 = pd.read_csv('scen_9301-9700.csv').iloc[:1000]
+df18 = pd.read_csv('scen_9701-10000.csv').iloc[:1000]
+df19 = pd.read_csv('scen_10001-10300.csv').iloc[:1000]
+df20 = pd.read_csv('scen_10301-10600.csv').iloc[:1000]
 #df21 = pd.read_csv('./dataset/scen_10601-10900.csv').iloc[:1000]
 #df22 = pd.read_csv('./dataset/scen_10901-11236.csv').iloc[:1000]
 
-dfnss = pd.read_csv('./dataset/nss.csv')
+dfnss = pd.read_csv('nss_tau2.csv')
 dfnss.drop(['Unnamed: 0'], axis='columns', inplace=True)
 
 # join them together, 500 rows
@@ -68,6 +68,7 @@ df_total.drop(['inc_date', 'inc_date_ct', 'cv_ps_0'], axis = 1, inplace = True)
 
 # split train and test
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
 
 SEED = 500
 X_train, X_test, y_train, y_test= train_test_split(
@@ -78,17 +79,114 @@ X_train, X_test, y_train, y_test= train_test_split(
     )
 
 #save testing and training data for later use (use list as a container)
-with open(r"./dataset/LLcvalue.pickle", "wb") as output_file:
+with open(r"LLcvalue.pickle", "wb") as output_file:
     pickle.dump([X_train, y_train, X_test, y_test], output_file) #dump
 #This file will be used in later scripts.
+
 #You can load the file containing variables [X_train, y_train, X_test, y_test]
-#with open(r"LLcvalue.pickle", "rb") as input_file:
-#    X_train, y_train, X_test, y_test = pickle.load(input_file)
+import pickle
+with open(r"LLcvalue.pickle", "rb") as input_file:
+    X_train, y_train, X_test, y_test = pickle.load(input_file)
 
 
-os.add_dll_directory('c:/Users/host/anaconda3/Lib/site-packages/lightgbm')
-os.add_dll_directory('c:/Users/host/anaconda3')
-os.add_dll_directory('c:/Users/host/anaconda3/lib')
+#%reset -f
+SEED = 500
 
-import lightgbm as lgb #pip3 install lightgbm
+import lightgbm as lgb #pip3 install lightbm
+
+# Instantiate a lgb.LGBMRegressor
+lgbm0 = lgb.LGBMRegressor(seed=SEED)
+
+#Fit with SciKit
+lgbm0.fit(X_train, y_train)
+
+# Predict the test set labels 'y_pred0'
+y_pred0 = lgbm0.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test0 = mean_squared_error(y_test, y_pred0, squared=False)
+print(rmse_test0)
+
+########################
+####Grid optimization###
+########################
+
+#setup params grid
+param_grid = {'learning_rate': [0.01,0.2,0.5], #alias eta, Step size shrinkage used in update to prevents overfitting.  
+    'n_estimators': [20, 50, 100],
+    'max_depth': [3, 5, 10],
+    'num_leaves': [16, 64, 128], 
+    'min_data_in_leaf' : [16, 64, 128]
+    }
+
+
+from sklearn. model_selection import GridSearchCV
+import time
+
+#instantiate XGBRegressor 
+lgbm = lgb.LGBMRegressor(seed=SEED)
+grid_mse = GridSearchCV(estimator=lgbm,
+                        param_grid=param_grid,
+                        scoring='neg_mean_squared_error', 
+                        cv=3, 
+                        verbose=1, 
+                        n_jobs=1)
+#fit  GridSearchCV 
+tic = time.perf_counter() #begin timing
+grid_mse.fit(X_train, y_train)
+time_fit_cv = time.perf_counter() - tic #save timer
+
+print("Best parameters found: ",grid_mse.best_params_) #best_params_
+print("Lowest RMSE found: ", np.sqrt(np.abs(grid_mse.best_score_))) #best_score_
+
+#extract the estimator best_estimator_ 
+lgbm_ins = grid_mse.best_estimator_ #best_estimator_
+
+# Predict the test set labels 'y_pred'
+y_pred = lgbm_ins.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test = mean_squared_error(y_test, y_pred, squared=False)
+print(rmse_test)
+
+
+###################################
+####Grid randomized optimization###
+###################################
+
+from sklearn.model_selection import RandomizedSearchCV
+
+#setup params grid
+param_grid = {'learning_rate': [0.01,0.1,0.5], #alias eta, Step size shrinkage used in update to prevents overfitting.  
+    'n_estimators': [20, 50, 100],
+    'subsample': [0.5, 0.8, 1], #Subsample ratio of the training instances
+    'max_depth': [3, 5, 10],
+    'colsample_bytree': [0.5, 1] #colsample_bytree is the subsample ratio of columns when constructing each tree. Subsampling occurs once for every tree constructed.
+    }
+
+#instantiate LGBMRegressor 
+lgbm = lgb.LGBMRegressor(seed=SEED)
+grid_mse = RandomizedSearchCV(estimator=lgbm,
+                        param_distributions=param_grid,
+                        scoring='neg_mean_squared_error', 
+                        cv=3, 
+                        verbose=1, 
+                        n_jobs=1)
+#fit  GridSearchCV 
+tic = time.perf_counter() #begin timing
+grid_mse.fit(X_train, y_train)
+time_fit_cv = time.perf_counter() - tic #save timer
+
+print("Best parameters found: ",grid_mse.best_params_) #best_params_
+print("Lowest RMSE found: ", np.sqrt(np.abs(grid_mse.best_score_))) #best_score_
+
+#extract the estimator best_estimator_ 
+lgbm_ins = grid_mse.best_estimator_ #best_estimator_
+
+# Predict the test set labels 'y_pred'
+y_pred = lgbm_ins.predict(X_test)
+
+# Evaluate the test set RMSE
+rmse_test = mean_squared_error(y_test, y_pred, squared=False)
+print(rmse_test)
 
