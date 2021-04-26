@@ -202,7 +202,7 @@ rmse_test = mean_squared_error(y_test, y_pred, squared=False)
 print(rmse_test)
 
 #send to spreadsheet
-import requests, datetime
+import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
@@ -211,7 +211,9 @@ requests.post(
         'RMSE': str(rmse_test),
         'DATETIME': datetime.datetime.now().isoformat(),
         'SEED': SEED,
-        'RATIO': RATIO
+        'RATIO': RATIO,
+        'PARAM_GRID': json.dumps(param_grid, indent=0),
+        'BEST_PARAMS':json.dumps(grid_mse.best_params_, indent=0)
     },
 )
 
