@@ -7,7 +7,6 @@ from datetime import datetime
 import statistics as st
 import datetime
 import pickle
-#test
 
 # load all files and get random intances
 RATIO = 0.0001 # portion of dataset
@@ -201,6 +200,20 @@ y_pred = lgbm_ins.predict(X_test)
 # Evaluate the test set RMSE
 rmse_test = mean_squared_error(y_test, y_pred, squared=False)
 print(rmse_test)
+
+#send to spreadsheet
+import requests, datetime
+requests.post(
+    "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
+    json={
+        'Name': 'Marek',
+        'TEST': 'GRID',
+        'RMSE': str(rmse_test),
+        'DATETIME': datetime.datetime.now().isoformat(),
+        'SEED': SEED,
+        'RATIO': RATIO
+    },
+)
 
 
 ###################################
