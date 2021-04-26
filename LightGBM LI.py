@@ -7,37 +7,90 @@ from datetime import datetime
 import statistics as st
 import datetime
 import pickle
-# comment
 
-# load all files
-df1 = pd.read_csv('scen_0001-0200.csv').iloc[:1000]
-df2 = pd.read_csv('scen_0201-0500.csv').iloc[:1000]
-df3 = pd.read_csv('scen_0501-0700.csv').iloc[:1000]
-df4 = pd.read_csv('scen_0701-1000.csv').iloc[:1000]
-df5 = pd.read_csv('scen_1001-1300.csv').iloc[:1000]
-df6 = pd.read_csv('scen_1301-1600.csv').iloc[:1000]
-df7 = pd.read_csv('scen_1601-1900.csv').iloc[:1000]
-df8 = pd.read_csv('scen_1901-2236.csv').iloc[:1000]
-df9 = pd.read_csv('scen_6001-6300.csv').iloc[:1000]
-df10 = pd.read_csv('scen_6301-6600.csv').iloc[:1000]
-df11 = pd.read_csv('scen_6601-6900.csv').iloc[:1000]
-df12 = pd.read_csv('scen_6901-7200.csv').iloc[:1000]
-df13 = pd.read_csv('scen_7201-7500.csv').iloc[:1000]
-df14 = pd.read_csv('scen_7501-7800.csv').iloc[:1000]
-df15 = pd.read_csv('scen_7801-8236.csv').iloc[:1000]
-df16 = pd.read_csv('scen_9001-9300.csv').iloc[:1000]
-df17 = pd.read_csv('scen_9301-9700.csv').iloc[:1000]
-df18 = pd.read_csv('scen_9701-10000.csv').iloc[:1000]
-df19 = pd.read_csv('scen_10001-10300.csv').iloc[:1000]
-df20 = pd.read_csv('scen_10301-10600.csv').iloc[:1000]
-#df21 = pd.read_csv('./dataset/scen_10601-10900.csv').iloc[:1000]
-#df22 = pd.read_csv('./dataset/scen_10901-11236.csv').iloc[:1000]
 
+# load all files and get random intances
+RATIO = 0.0001 # portion of dataset
+
+def df_get_instances(df, ratio):
+    df = df.iloc[np.random.randint(0, df.shape[0], int(df.shape[0] * ratio))]
+    return df
+
+df1 = pd.read_csv('scen_0001-0200.csv')
+df1 = df_get_instances(df1, RATIO)
+
+df2 = pd.read_csv('scen_0201-0500.csv')
+df2 = df_get_instances(df2, RATIO)
+
+df3 = pd.read_csv('scen_0501-0700.csv')
+df3 = df_get_instances(df3, RATIO)
+
+df4 = pd.read_csv('scen_0701-1000.csv')
+df4 = df_get_instances(df4, RATIO)
+
+df5 = pd.read_csv('scen_1001-1300.csv')
+df5 = df_get_instances(df5, RATIO)
+
+df6 = pd.read_csv('scen_1301-1600.csv')
+df6 = df_get_instances(df6, RATIO)
+
+df7 = pd.read_csv('scen_1601-1900.csv')
+df7 = df_get_instances(df7, RATIO)
+
+df8 = pd.read_csv('scen_1901-2236.csv')
+df8 = df_get_instances(df8, RATIO)
+
+df9 = pd.read_csv('scen_6001-6300.csv')
+df9 = df_get_instances(df9, RATIO)
+
+df10 = pd.read_csv('scen_6301-6600.csv')
+df10 = df_get_instances(df10, RATIO)
+
+df11 = pd.read_csv('scen_6601-6900.csv')
+df11 = df_get_instances(df11, RATIO)
+
+df12 = pd.read_csv('scen_6901-7200.csv')
+df12 = df_get_instances(df12, RATIO)
+
+df13 = pd.read_csv('scen_7201-7500.csv')
+df13 = df_get_instances(df13, RATIO)
+
+df14 = pd.read_csv('scen_7501-7800.csv')
+df14 = df_get_instances(df14, RATIO)
+
+df15 = pd.read_csv('scen_7801-8236.csv')
+df15 = df_get_instances(df15, RATIO)
+
+df16 = pd.read_csv('scen_9001-9300.csv')
+df16 = df_get_instances(df16, RATIO)
+
+df17 = pd.read_csv('scen_9301-9700.csv')
+df17 = df_get_instances(df17, RATIO)
+
+df18 = pd.read_csv('scen_9701-10000.csv')
+df18 = df_get_instances(df18, RATIO)
+
+df19 = pd.read_csv('scen_10001-10300.csv')
+df19 = df_get_instances(df19, RATIO)
+
+df20 = pd.read_csv('scen_10301-10600.csv')
+df20 = df_get_instances(df20, RATIO)
+
+df21 = pd.read_csv('scen_10601-10900.csv')
+df21 = df_get_instances(df21, RATIO)
+
+df22 = pd.read_csv('scen_10901-11236.csv')
+df22 = df_get_instances(df22, RATIO)
+
+#load curves following NSS optimization
 dfnss = pd.read_csv('nss_tau2.csv')
 dfnss.drop(['Unnamed: 0'], axis='columns', inplace=True)
 
-# join them together, 500 rows
-df_total = pd.concat([eval('df'+str(i+1)+'.iloc[:50]') for i in range(20)])
+# join them together
+df_total = pd.concat([eval('df'+str(i+1)) for i in range(22)])
+
+# join them together, ___ rows
+#df_total = pd.concat([eval('df'+str(i+1)+'.iloc[:___]') for i in range(20)])
 
 # join NSS
 df_total = pd.merge(df_total, dfnss, how='inner', left_on=['POL_NUM'], right_on=['scnum'])
