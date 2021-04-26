@@ -201,19 +201,27 @@ y_pred = lgbm_ins.predict(X_test)
 rmse_test = mean_squared_error(y_test, y_pred, squared=False)
 print(rmse_test)
 
+#Evaluate 
+from sklearn.metrics import r2_score
+print(r2_score(y_test, y_pred))
+
+
 #send to spreadsheet
 import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
-        'Name': 'Marek',
+        'Name': '_______',
         'TEST': 'GRID',
         'RMSE': str(rmse_test),
         'DATETIME': datetime.datetime.now().isoformat(),
         'SEED': SEED,
         'RATIO': RATIO,
         'PARAM_GRID': json.dumps(param_grid, indent=0),
-        'BEST_PARAMS':json.dumps(grid_mse.best_params_, indent=0)
+        'BEST_PARAMS':json.dumps(grid_mse.best_params_, indent=0),
+        'TIME_FIT': time_fit_cv,
+        'LOW_RMSE': np.sqrt(np.abs(grid_mse.best_score_))),
+        'RSCORE': r2_score(y_test, y_pred)
     },
 )
 
