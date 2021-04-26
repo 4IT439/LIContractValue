@@ -211,7 +211,7 @@ import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
-        'Name': '_______',
+        'Name': 'ivo',
         'TEST': 'GRID',
         'RMSE': str(rmse_test),
         'DATETIME': datetime.datetime.now().isoformat(),
