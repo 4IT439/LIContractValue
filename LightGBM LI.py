@@ -7,7 +7,7 @@ from datetime import datetime
 import statistics as st
 import datetime
 import pickle
-#comment 2
+
 
 # load all files
 df1 = pd.read_csv('scen_0001-0200.csv').iloc[:1000]
