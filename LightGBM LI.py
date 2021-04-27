@@ -206,12 +206,14 @@ from sklearn.metrics import r2_score
 print(r2_score(y_test, y_pred))
 
 
-#send to spreadsheet
+#send performance metrics to a google sheet,
+#can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
+#name to be filled in
 import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
-        'Name': 'ivo',
+        'Name': '____',
         'TEST': 'GRID',
         'RMSE': str(rmse_test),
         'DATETIME': datetime.datetime.now().isoformat(),
@@ -220,7 +222,7 @@ requests.post(
         'PARAM_GRID': json.dumps(param_grid, indent=0),
         'BEST_PARAMS':json.dumps(grid_mse.best_params_, indent=0),
         'TIME_FIT': time_fit_cv,
-        'LOW_RMSE': np.sqrt(np.abs(grid_mse.best_score_))),
+        'LOW_RMSE': np.sqrt(np.abs(grid_mse.best_score_)),
         'RSCORE': r2_score(y_test, y_pred)
     },
 )
