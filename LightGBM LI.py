@@ -20,8 +20,13 @@ SEED = 500
 
 
 from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
-	
+from sklearn.metrics import make_scorer
+
+def mean_absolute_percentage_error(y_true, y_pred): 
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
+mape_scorer = make_scorer(mean_absolute_percentage_error, greater_is_better=False)
+
 import lightgbm as lgb #pip3 install lightbm
 
 # Instantiate a lgb.LGBMRegressor
@@ -34,8 +39,8 @@ lgbm0.fit(X_train, y_train)
 y_pred0 = lgbm0.predict(X_test)
 
 # Evaluate the test set RMSE
-r2_test0 = r2_score(y_test, y_pred0)
-print(r2_test0)
+MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
+print(MAPE_test0)
 
 ########################
 ####Grid optimization###
@@ -50,6 +55,10 @@ param_grid = {'learning_rate': [0.01,0.2,0.5], #alias eta, Step size shrinkage u
     }
 
 
+# 95 : 5 validacni
+# variable importance
+
+
 from sklearn. model_selection import GridSearchCV
 import time
 
@@ -57,7 +66,7 @@ import time
 lgbm = lgb.LGBMRegressor(seed=SEED)
 grid_mse = GridSearchCV(estimator=lgbm,
                         param_grid=param_grid,
-                        scoring='r2', 
+                        scoring=mape_scorer, 
                         cv=3, 
                         verbose=1, 
                         n_jobs=1)
@@ -67,7 +76,7 @@ grid_mse.fit(X_train, y_train)
 time_fit_cv = time.perf_counter() - tic #save timer
 
 print("Best parameters found: ",grid_mse.best_params_) #best_params_
-print("Lowest R2 score found: ", np.abs(grid_mse.best_score_)) #best_score_
+print("Lowest MAPE found: ", np.abs(grid_mse.best_score_)) #best_score_
 
 #extract the estimator best_estimator_ 
 lgbm_ins = grid_mse.best_estimator_ #best_estimator_
@@ -76,8 +85,8 @@ lgbm_ins = grid_mse.best_estimator_ #best_estimator_
 y_pred = lgbm_ins.predict(X_test)
 
 # Evaluate the test set R2score
-r2_test = r2_score(y_test, y_pred)
-print(r2_test)
+mape_test = mean_absolute_percentage_error(y_test, y_pred)
+print(mape_test)
 
 
 #send performance metrics to a google sheet,
@@ -97,7 +106,7 @@ requests.post(
         'BEST_PARAMS':json.dumps(grid_mse.best_params_, indent=0),
         'TIME_FIT': time_fit_cv,
         'LOW_RMSE': 'N/A',
-        'R2SCORE': r2_score(y_test, y_pred)
+        'MAPESCORE': mean_absolute_percentage_error(y_test, y_pred)
     },
 )
 
