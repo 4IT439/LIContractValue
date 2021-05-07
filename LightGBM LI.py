@@ -29,6 +29,7 @@ mape_scorer = make_scorer(mean_absolute_percentage_error, greater_is_better=Fals
 
 import lightgbm as lgb #pip3 install lightbm
 
+
 # Instantiate a lgb.LGBMRegressor
 lgbm0 = lgb.LGBMRegressor(seed=SEED)
 
@@ -41,6 +42,73 @@ y_pred0 = lgbm0.predict(X_test)
 # Evaluate the test set RMSE
 MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
 print(MAPE_test0)
+
+
+#################################
+##### Stepwise Optimization #####
+#################################
+
+
+# TO DO variable importance
+
+
+# Split the dataset into training_validation and testing part
+# 95 : 5 
+
+from sklearn.model_selection import train_test_split
+
+validation_ratio = 0.05
+
+X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split( 
+    X_train, y_train,
+    test_size = validation_ratio, 
+    random_state = SEED
+    )
+
+#setup params grid
+
+import random
+
+GRID_SIZE = 20
+SEED = 333
+
+random.seed(SEED)
+grid = pd.DataFrame({
+    'n_estimators' : [random.randint(50, 500) for x in range(GRID_SIZE)],
+    'max_depth' : [random.randint(3, 8) for x in range(GRID_SIZE)],
+    'learning_rate' : np.power([10 for x in range(GRID_SIZE)], [random.uniform(-3, -0.5) for x in range(GRID_SIZE)]),
+    'min_data_in_leaf' : [random.randint(10, 25) for x in range(GRID_SIZE)]
+    })
+
+
+def fit_regressor(X_train, y_train, params):
+    # Instantiate a lgb.LGBMRegressor
+    lgbm0 = lgb.LGBMRegressor(seed=SEED,
+    #n_estimators=params['n_estimators'],
+    max_depth=int(params['max_depth']),
+    learning_rate=params['learning_rate'],
+    min_data_in_leaf=int(params['min_data_in_leaf'])
+    )
+    #Fit with SciKit
+    lgbm0.fit(X_train, y_train)
+    # Predict the test set labels 'y_pred0'
+    y_pred0 = lgbm0.predict(X_test)
+    # Evaluate the test set RMSE
+    MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
+    
+    return {'MAPE': MAPE_test0}
+
+
+# fit regressor and compute MAPE for each param vector
+MAPE_list = np.empty(grid.shape[0])
+for i in range(grid.shape[0]):
+    MAPE_list[i] = fit_regressor(
+        X_train_valid, y_train_valid, grid.iloc[i]
+        )['MAPE']
+
+#add MAPE to grid  
+grid['MAPE'] = MAPE_list
+
 
 ########################
 ####Grid optimization###
@@ -55,8 +123,6 @@ param_grid = {'learning_rate': [0.01,0.2,0.5], #alias eta, Step size shrinkage u
     }
 
 
-# 95 : 5 validacni
-# variable importance
 
 
 from sklearn. model_selection import GridSearchCV
