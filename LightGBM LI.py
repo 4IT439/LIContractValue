@@ -83,10 +83,82 @@ grid = pd.DataFrame({
     })
 
 
+
 def fit_regressor(X_train, y_train, X_test, y_test, params):
     # Instantiate a lgb.LGBMRegressor
     lgbm0 = lgb.LGBMRegressor(seed=SEED,
-    #n_estimators=params['n_estimators'],
+    n_estimators=int(params['n_estimators']),
+    max_depth=int(params['max_depth']),
+    learning_rate=params['learning_rate'],
+    min_data_in_leaf=int(params['min_data_in_leaf'])
+    )
+    #Fit with SciKit
+    lgbm0.fit(X_train, y_train)
+    # Predict the test set labels 'y_pred0'
+    y_pred0 = lgbm0.predict(X_test)
+    # Evaluate the test set RMSE
+    MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
+    
+    return {'MAPE': MAPE_test0}
+
+
+import time
+
+# fit regressor and compute MAPE for each param vector
+tic = time.perf_counter() #begin timing
+MAPE_list = np.empty(grid.shape[0])
+for i in range(grid.shape[0]):
+    MAPE_list[i] = fit_regressor(
+        X_train_valid, y_train_valid,
+        X_test_valid, y_test_valid,
+         grid.iloc[i]
+        )['MAPE']
+time_fit_cv = time.perf_counter() - tic #save timer
+grid['MAPE'] = MAPE_list #add MAPE to grid  
+
+
+best_fit_no = np.argmin(grid['MAPE'])
+
+low_MAPE = grid.iloc[best_fit_no]['MAPE']
+best_params = grid.iloc[best_fit_no].drop('MAPE').to_dict()
+train_size = X_train_valid.shape[0]
+
+print(low_MAPE)
+
+
+#send performance metrics to a google sheet,
+#can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
+#name to be filled in
+
+NAME = '________' # jmeno vyplnte sem
+
+import requests, datetime, json
+requests.post(
+    "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
+    json={
+       'Name': NAME,
+        'TEST': 'VECTOR',
+        'RMSE': 'N/A',
+        'DATETIME': datetime.datetime.now().isoformat(),
+        'SEED': SEED,
+        'RATIO': 'N/A',
+        'PARAM_GRID': 'N/A',
+        'BEST_PARAMS':json.dumps(best_params, indent=0),
+        'TIME_FIT': time_fit_cv,
+        'LOW_RMSE': 'N/A',
+        'MAPESCORE': low_MAPE,
+        'N_ROWS_TRAIN': train_size,
+        'GRID_SIZE': GRID_SIZE
+    }
+)
+
+
+#MAPE OBJ
+
+def fit_regressor(X_train, y_train, X_test, y_test, params):
+    # Instantiate a lgb.LGBMRegressor
+    lgbm0 = lgb.LGBMRegressor(seed=SEED, objective='mape',
+    n_estimators=int(params['n_estimators']),
     max_depth=int(params['max_depth']),
     learning_rate=params['learning_rate'],
     min_data_in_leaf=int(params['min_data_in_leaf'])
@@ -132,8 +204,8 @@ import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
-       'Name': '____TEST',
-        'TEST': 'VECTOR',
+       'Name': NAME,
+        'TEST': 'VECTOR MAPE OBJ',
         'RMSE': 'N/A',
         'DATETIME': datetime.datetime.now().isoformat(),
         'SEED': SEED,
@@ -143,7 +215,8 @@ requests.post(
         'TIME_FIT': time_fit_cv,
         'LOW_RMSE': 'N/A',
         'MAPESCORE': low_MAPE,
-        'N_ROWS_TRAIN': train_size
+        'N_ROWS_TRAIN': train_size,
+        'GRID_SIZE': GRID_SIZE
     }
 )
 
