@@ -16,7 +16,7 @@ with open(r"LLcvalue.pickle", "rb") as input_file:
 
 
 #%reset -f
-SEED = 500
+SEED = 333
 
 
 from sklearn.metrics import mean_squared_error
@@ -74,7 +74,7 @@ import random
 GRID_SIZE = 20
 SEED = 333
 
-random.seed(SEED)
+#random.seed(SEED) # DEACTIVATED
 grid = pd.DataFrame({
     'n_estimators' : [random.randint(50, 500) for x in range(GRID_SIZE)],
     'max_depth' : [random.randint(3, 8) for x in range(GRID_SIZE)],
@@ -144,7 +144,7 @@ requests.post(
         'TEST': 'VECTOR',
         'RMSE': 'N/A',
         'DATETIME': datetime.datetime.now().isoformat(),
-        'SEED': SEED,
+        'SEED': 'inactive',
         'RATIO': 'N/A',
         'PARAM_GRID': 'N/A',
         'BEST_PARAMS': json.dumps(best_params, indent=0),
@@ -219,7 +219,7 @@ requests.post(
         'TEST': 'VECTOR MAPE OBJ',
         'RMSE': 'N/A',
         'DATETIME': datetime.datetime.now().isoformat(),
-        'SEED': SEED,
+        'SEED': 'inactive',
         'RATIO': 'N/A',
         'PARAM_GRID': 'N/A',
         'BEST_PARAMS': json.dumps(best_params, indent=0),
