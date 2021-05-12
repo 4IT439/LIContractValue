@@ -98,8 +98,9 @@ def fit_regressor(X_train, y_train, X_test, y_test, params):
     y_pred0 = lgbm0.predict(X_test)
     # Evaluate the test set RMSE
     MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
-    
-    return {'MAPE': MAPE_test0}
+    return MAPE_test0, np.array_str(lgbm0.feature_importances_)
+
+
 
 
 import time
@@ -107,21 +108,24 @@ import time
 # fit regressor and compute MAPE for each param vector
 tic = time.perf_counter() #begin timing
 MAPE_list = np.empty(grid.shape[0])
+FIMP_list = np.empty(grid.shape[0], dtype=str)
 for i in range(grid.shape[0]):
-    MAPE_list[i] = fit_regressor(
+    MAPE_list[i], FIMP_list[i] = fit_regressor(
         X_train_valid, y_train_valid,
         X_test_valid, y_test_valid,
          grid.iloc[i]
-        )['MAPE']
+        )
 time_fit_cv = time.perf_counter() - tic #save timer
 grid['MAPE'] = MAPE_list #add MAPE to grid  
-
+grid['FIMP'] = FIMP_list #add FIMP to grid  
 
 best_fit_no = np.argmin(grid['MAPE'])
 
 low_MAPE = grid.iloc[best_fit_no]['MAPE']
-best_params = grid.iloc[best_fit_no].drop('MAPE').to_dict()
+best_params = grid.iloc[best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
 train_size = X_train_valid.shape[0]
+columns = str(X_train_valid.columns.values)
+fimp = grid.iloc[best_fit_no]['FIMP']
 
 print(low_MAPE)
 
@@ -130,7 +134,7 @@ print(low_MAPE)
 #can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
 #name to be filled in
 
-NAME = '________' # jmeno vyplnte sem
+NAME = '_________' # jmeno vyplnte sem
 
 import requests, datetime, json
 requests.post(
@@ -143,14 +147,17 @@ requests.post(
         'SEED': SEED,
         'RATIO': 'N/A',
         'PARAM_GRID': 'N/A',
-        'BEST_PARAMS':json.dumps(best_params, indent=0),
+        'BEST_PARAMS': json.dumps(best_params, indent=0),
         'TIME_FIT': time_fit_cv,
         'LOW_RMSE': 'N/A',
         'MAPESCORE': low_MAPE,
         'N_ROWS_TRAIN': train_size,
-        'GRID_SIZE': GRID_SIZE
+        'GRID_SIZE': GRID_SIZE,
+        'COLUMNS': columns,
+        'FEATURE_IMPORTANCES': fimp
     }
 )
+
 
 
 #MAPE OBJ
@@ -169,8 +176,9 @@ def fit_regressor(X_train, y_train, X_test, y_test, params):
     y_pred0 = lgbm0.predict(X_test)
     # Evaluate the test set RMSE
     MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
-    
-    return {'MAPE': MAPE_test0}
+    return MAPE_test0, np.array_str(lgbm0.feature_importances_)
+
+
 
 
 import time
@@ -178,28 +186,31 @@ import time
 # fit regressor and compute MAPE for each param vector
 tic = time.perf_counter() #begin timing
 MAPE_list = np.empty(grid.shape[0])
+FIMP_list = np.empty(grid.shape[0], dtype=str)
 for i in range(grid.shape[0]):
-    MAPE_list[i] = fit_regressor(
+    MAPE_list[i], FIMP_list[i] = fit_regressor(
         X_train_valid, y_train_valid,
         X_test_valid, y_test_valid,
          grid.iloc[i]
-        )['MAPE']
+        )
 time_fit_cv = time.perf_counter() - tic #save timer
 grid['MAPE'] = MAPE_list #add MAPE to grid  
-
+grid['FIMP'] = FIMP_list #add FIMP to grid  
 
 best_fit_no = np.argmin(grid['MAPE'])
 
 low_MAPE = grid.iloc[best_fit_no]['MAPE']
-best_params = grid.iloc[best_fit_no].drop('MAPE').to_dict()
+best_params = grid.iloc[best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
 train_size = X_train_valid.shape[0]
+columns = str(X_train_valid.columns.values)
+fimp = grid.iloc[best_fit_no]['FIMP']
 
 print(low_MAPE)
 
 
 #send performance metrics to a google sheet,
 #can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
-#name to be filled in
+
 import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
@@ -211,13 +222,13 @@ requests.post(
         'SEED': SEED,
         'RATIO': 'N/A',
         'PARAM_GRID': 'N/A',
-        'BEST_PARAMS':json.dumps(best_params, indent=0),
+        'BEST_PARAMS': json.dumps(best_params, indent=0),
         'TIME_FIT': time_fit_cv,
         'LOW_RMSE': 'N/A',
         'MAPESCORE': low_MAPE,
         'N_ROWS_TRAIN': train_size,
-        'GRID_SIZE': GRID_SIZE
+        'GRID_SIZE': GRID_SIZE,
+        'COLUMNS': columns,
+        'FEATURE_IMPORTANCES': fimp
     }
 )
-
-
