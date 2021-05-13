@@ -68,18 +68,29 @@ X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split(
 X_train_valid, y_train_valid, X_test_valid, y_test_valid = X_train, y_train, X_test, y_test
 
 
-#setup params grid
+# Setup params grid
+# initial ranges
+GRID_SIZE = 20
+N_ESTIMATORS_MIN = 50
+N_ESTIMATORS_MAX = 500
+MAX_DEPTH_MIN = 3
+MAX_DEPTH_MAX = 8
+LEARNING_RATE_COEF_MIN = -3
+LEARNING_RATE_COEF_MAX = -0.5
+MIN_DATA_IN_LEAF_MIN = 10
+MIN_DATA_IN_LEAF_MAX = 25
+
 import random
 
-GRID_SIZE = 20
 SEED = 333
 
 #random.seed(SEED) # DEACTIVATED
 grid = pd.DataFrame({
-    'n_estimators' : [random.randint(50, 500) for x in range(GRID_SIZE)],
-    'max_depth' : [random.randint(3, 8) for x in range(GRID_SIZE)],
-    'learning_rate' : np.power([10 for x in range(GRID_SIZE)], [random.uniform(-3, -0.5) for x in range(GRID_SIZE)]),
-    'min_data_in_leaf' : [random.randint(10, 25) for x in range(GRID_SIZE)]
+    'n_estimators' : [random.randint(N_ESTIMATORS_MIN, N_ESTIMATORS_MAX) for x in range(GRID_SIZE)],
+    'max_depth' : [random.randint(MAX_DEPTH_MIN, MAX_DEPTH_MAX) for x in range(GRID_SIZE)],
+    'learning_rate' : np.power([10 for x in range(GRID_SIZE)], [random.uniform(LEARNING_RATE_COEF_MIN,
+     LEARNING_RATE_COEF_MAX) for x in range(GRID_SIZE)]),
+    'min_data_in_leaf' : [random.randint(MIN_DATA_IN_LEAF_MIN, MIN_DATA_IN_LEAF_MAX) for x in range(GRID_SIZE)]
     })
 
 
