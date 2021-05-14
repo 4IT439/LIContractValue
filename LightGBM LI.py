@@ -65,9 +65,6 @@ X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split(
     random_state = SEED
     )
 
-X_train_valid, y_train_valid, X_test_valid, y_test_valid = X_train, y_train, X_test, y_test
-
-
 # Setup params grid
 # initial ranges
 GRID_SIZE = 20
@@ -77,8 +74,8 @@ MAX_DEPTH_MIN = 3
 MAX_DEPTH_MAX = 8
 LEARNING_RATE_COEF_MIN = -3
 LEARNING_RATE_COEF_MAX = -0.5
-MIN_DATA_IN_LEAF_MIN = 10
-MIN_DATA_IN_LEAF_MAX = 25
+MIN_DATA_IN_LEAF_MIN = 20
+MIN_DATA_IN_LEAF_MAX = 20
 
 import random
 
@@ -92,7 +89,6 @@ grid = pd.DataFrame({
      LEARNING_RATE_COEF_MAX) for x in range(GRID_SIZE)]),
     'min_data_in_leaf' : [random.randint(MIN_DATA_IN_LEAF_MIN, MIN_DATA_IN_LEAF_MAX) for x in range(GRID_SIZE)]
     })
-
 
 
 def fit_regressor(X_train, y_train, X_test, y_test, params):
@@ -109,9 +105,7 @@ def fit_regressor(X_train, y_train, X_test, y_test, params):
     y_pred0 = lgbm0.predict(X_test)
     # Evaluate the test set RMSE
     MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
-    return MAPE_test0, np.array_str(lgbm0.feature_importances_)
-
-
+    return MAPE_test0, str(tuple(lgbm0.feature_importances_))
 
 
 import time
@@ -119,7 +113,7 @@ import time
 # fit regressor and compute MAPE for each param vector
 tic = time.perf_counter() #begin timing
 MAPE_list = np.empty(grid.shape[0])
-FIMP_list = np.empty(grid.shape[0], dtype=str)
+FIMP_list = ['' for x in range(grid.shape[0])]
 for i in range(grid.shape[0]):
     MAPE_list[i], FIMP_list[i] = fit_regressor(
         X_train_valid, y_train_valid,
@@ -138,14 +132,15 @@ train_size = X_train_valid.shape[0]
 columns = str(X_train_valid.columns.values)
 fimp = grid.iloc[best_fit_no]['FIMP']
 
-print(low_MAPE)
+print(FIMP_list[best_fit_no])
 
+print(low_MAPE)
 
 #send performance metrics to a google sheet,
 #can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
 #name to be filled in
 
-NAME = '_________' # jmeno vyplnte sem
+NAME = '_____' # jmeno vyplnte sem
 
 import requests, datetime, json
 requests.post(
@@ -153,81 +148,6 @@ requests.post(
     json={
        'Name': NAME,
         'TEST': 'VECTOR',
-        'RMSE': 'N/A',
-        'DATETIME': datetime.datetime.now().isoformat(),
-        'SEED': 'inactive',
-        'RATIO': 'N/A',
-        'PARAM_GRID': 'N/A',
-        'BEST_PARAMS': json.dumps(best_params, indent=0),
-        'TIME_FIT': time_fit_cv,
-        'LOW_RMSE': 'N/A',
-        'MAPESCORE': low_MAPE,
-        'N_ROWS_TRAIN': train_size,
-        'GRID_SIZE': GRID_SIZE,
-        'COLUMNS': columns,
-        'FEATURE_IMPORTANCES': fimp
-    }
-)
-
-
-
-#MAPE OBJ
-
-def fit_regressor(X_train, y_train, X_test, y_test, params):
-    # Instantiate a lgb.LGBMRegressor
-    lgbm0 = lgb.LGBMRegressor(seed=SEED, objective='mape',
-    n_estimators=int(params['n_estimators']),
-    max_depth=int(params['max_depth']),
-    learning_rate=params['learning_rate'],
-    min_data_in_leaf=int(params['min_data_in_leaf'])
-    )
-    #Fit with SciKit
-    lgbm0.fit(X_train, y_train)
-    # Predict the test set labels 'y_pred0'
-    y_pred0 = lgbm0.predict(X_test)
-    # Evaluate the test set RMSE
-    MAPE_test0 = mean_absolute_percentage_error(y_test, y_pred0)
-    return MAPE_test0, np.array_str(lgbm0.feature_importances_)
-
-
-
-
-import time
-
-# fit regressor and compute MAPE for each param vector
-tic = time.perf_counter() #begin timing
-MAPE_list = np.empty(grid.shape[0])
-FIMP_list = np.empty(grid.shape[0], dtype=str)
-for i in range(grid.shape[0]):
-    MAPE_list[i], FIMP_list[i] = fit_regressor(
-        X_train_valid, y_train_valid,
-        X_test_valid, y_test_valid,
-         grid.iloc[i]
-        )
-time_fit_cv = time.perf_counter() - tic #save timer
-grid['MAPE'] = MAPE_list #add MAPE to grid  
-grid['FIMP'] = FIMP_list #add FIMP to grid  
-
-best_fit_no = np.argmin(grid['MAPE'])
-
-low_MAPE = grid.iloc[best_fit_no]['MAPE']
-best_params = grid.iloc[best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
-train_size = X_train_valid.shape[0]
-columns = str(X_train_valid.columns.values)
-fimp = grid.iloc[best_fit_no]['FIMP']
-
-print(low_MAPE)
-
-
-#send performance metrics to a google sheet,
-#can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
-
-import requests, datetime, json
-requests.post(
-    "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
-    json={
-       'Name': NAME,
-        'TEST': 'VECTOR MAPE OBJ',
         'RMSE': 'N/A',
         'DATETIME': datetime.datetime.now().isoformat(),
         'SEED': 'inactive',
