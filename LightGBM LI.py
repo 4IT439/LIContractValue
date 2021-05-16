@@ -163,3 +163,5 @@ requests.post(
         'FEATURE_IMPORTANCES': fimp
     }
 )
+
+print(best_params)
