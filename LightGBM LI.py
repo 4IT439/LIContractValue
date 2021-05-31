@@ -65,8 +65,8 @@ X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split(
 # Setup params grid
 # initial ranges
 GRID_SIZE = 5
-N_ESTIMATORS_MIN = 2000
-N_ESTIMATORS_MAX = 9000
+N_ESTIMATORS_MIN = 200
+N_ESTIMATORS_MAX = 900
 MAX_DEPTH_MIN = 3
 MAX_DEPTH_MAX = 8
 LEARNING_RATE_COEF_MIN = -3
@@ -141,6 +141,9 @@ sec_best_params = grid.iloc[sec_best_fit_no].drop('MAPE').drop('FIMP').astype(st
 y_pred = lgbm_list[sec_best_fit_no].predict(X_test_valid)
 sec_best_MAPE = mean_absolute_percentage_error(y_test_valid, y_pred)
 
+y_pred = lgbm_list[best_fit_no].predict(X_train_valid)
+MAPE_train_set = mean_absolute_percentage_error(y_train_valid, y_pred)
+
 print(low_MAPE)
 print(best_params)
 print(FIMP_list[best_fit_no])
@@ -150,7 +153,7 @@ print(FIMP_list[best_fit_no])
 #can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
 #name to be filled in
 
-NAME = '______' # jmeno vyplnte sem
+NAME = '_______' # jmeno vyplnte sem
 
 import requests, datetime, json
 requests.post(
@@ -174,7 +177,8 @@ requests.post(
         'FEATURE_IMPORTANCES': fimp,
         'MAPE_TEST_SET' : MAPE_test_set,
         '2_ND_BEST_MAPE' : sec_best_MAPE,
-        '2_ND_BEST_PARAMS' : json.dumps(sec_best_params, indent=0)
+        '2_ND_BEST_PARAMS' : json.dumps(sec_best_params, indent=0),
+        'MAPE_TRAIN_SET' : MAPE_train_set
     }
 )
 
