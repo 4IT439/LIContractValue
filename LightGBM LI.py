@@ -64,7 +64,7 @@ X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split(
 
 # Setup params grid
 # initial ranges
-GRID_SIZE = 5
+GRID_SIZE = 2
 N_ESTIMATORS_MIN = 200
 N_ESTIMATORS_MAX = 900
 MAX_DEPTH_MIN = 3
@@ -73,6 +73,7 @@ LEARNING_RATE_COEF_MIN = -3
 LEARNING_RATE_COEF_MAX = -0.5
 MIN_DATA_IN_LEAF_MIN = 20
 MIN_DATA_IN_LEAF_MAX = 20
+LEARNING_RATE_EXPL = 0 # keep 0 here, otherwise LEARNING_RATE_COEF will be omitted
 
 import random
 
@@ -83,7 +84,7 @@ grid = pd.DataFrame({
     'n_estimators' : [random.randint(N_ESTIMATORS_MIN, N_ESTIMATORS_MAX) for x in range(GRID_SIZE)],
     'max_depth' : [random.randint(MAX_DEPTH_MIN, MAX_DEPTH_MAX) for x in range(GRID_SIZE)],
     'learning_rate' : np.power([10 for x in range(GRID_SIZE)], [random.uniform(LEARNING_RATE_COEF_MIN,
-     LEARNING_RATE_COEF_MAX) for x in range(GRID_SIZE)]),
+     LEARNING_RATE_COEF_MAX) for x in range(GRID_SIZE)]) if LEARNING_RATE_EXPL==0 else [LEARNING_RATE_EXPL for x in range(GRID_SIZE)],
     'min_data_in_leaf' : [random.randint(MIN_DATA_IN_LEAF_MIN, MIN_DATA_IN_LEAF_MAX) for x in range(GRID_SIZE)]
     })
 
@@ -123,7 +124,7 @@ grid['MAPE'] = MAPE_list #add MAPE to grid
 grid['FIMP'] = FIMP_list #add FIMP to grid  
 
 
-best_fit_order = np.argpartition(grid['MAPE'], 2)
+best_fit_order = np.argpartition(grid['MAPE'], 1)
 best_fit_no = np.argmin(grid['MAPE'])
 sec_best_fit_no = best_fit_order[1]
 
@@ -153,7 +154,7 @@ print(FIMP_list[best_fit_no])
 #can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
 #name to be filled in
 
-NAME = '_______' # jmeno vyplnte sem
+NAME = '_____' # jmeno vyplnte sem
 
 import requests, datetime, json
 requests.post(
