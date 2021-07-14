@@ -8,10 +8,12 @@ import statistics as st
 import datetime
 import pickle
 import time
+import datetime
 
-N_ESTIMATORS = 200
-MAX_DEPTH = 3
-LEARNING_RATE = 0.1
+
+N_ESTIMATORS = 8514
+MAX_DEPTH = 8
+LEARNING_RATE = 0.06869888172491326
 MIN_DATA_IN_LEAF = 20
 
 #Load the file containing variables [X_train, y_train, X_test, y_test]
@@ -42,28 +44,35 @@ lgbm = lgb.LGBMRegressor(
     min_data_in_leaf = MIN_DATA_IN_LEAF
 )
 
-
+print("Starting fitting at", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+)
 tic = time.perf_counter() #begin timing
-
-#Fit with SciKit
+#Fit with datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")SciKit
 lgbm.fit(X_train, y_train)
-
 time_fit_cv = time.perf_counter() - tic #save timer
+print("Fitting completed at",
+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print()
 
-
+print("Starting test set prediction at",
+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 tic = time.perf_counter() #begin timing
 # Predict the test set labels 'y_pred0'
 y_pred = lgbm.predict(X_test)
-
 time_pred_cv = time.perf_counter() - tic #save timer
+print("Test set prediction completed at",
+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print()
 
-
+print("Starting train set prediction at",
+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 tic = time.perf_counter() #begin timing
 # Predict the train set labels 'y_pred_train'
 y_pred_train = lgbm.predict(X_train)
-
 time_pred_train_cv = time.perf_counter() - tic #save timer
-
+print("Train set prediction completed at",
+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+print()
 
 # Evaluate the test set MAPE
 MAPE_test = mean_absolute_percentage_error(y_test, y_pred)
@@ -75,41 +84,16 @@ print("Time fit: ", time_fit_cv)
 print()
 print("MAPE train set: ", MAPE_train)
 print("Time pred train set: ", time_pred_train_cv)
-print("No rows train set: ", X_train.shape[0])
+print("Row count train set: ", X_train.shape[0])
 print()
 print("MAPE test set: ", MAPE_test)
 print("Time pred test set: ", time_pred_cv)
-print("No rows test set: ", X_test.shape[0])
+print("Row count test set: ", X_test.shape[0])
+print()
 
-#send performance metrics to a google sheet,
-#can be viewed at https://docs.google.com/spreadsheets/d/e/2PACX-1vSYyv4pRN7Q2EgDaGY7UGwpHCe6oN7fE3d951zaVKyi_Fh1S6gCGY9IY9dbQL4HqdW0wW3gGfGrGpLN/pubhtml 
-#name to be filled in
-
-NAME = '_____' # jmeno vyplnte sem
-
-import requests, datetime, json
-requests.post(
-    "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
-    json={
-       'Name': NAME,
-        'TEST': 'VECTOR',
-        'RMSE': 'N/A',
-        'DATETIME': datetime.datetime.now().isoformat(),
-        'SEED': 'inactive',
-        'RATIO': 'N/A',
-        'PARAM_GRID': 'N/A',
-        'R2SCORE': 'N/A',
-        'BEST_PARAMS': json.dumps(best_params, indent=0),
-        'TIME_FIT': time_fit_cv,
-        'LOW_RMSE': 'N/A',
-        'MAPESCORE': low_MAPE,
-        'N_ROWS_TRAIN': train_size,
-        'GRID_SIZE': GRID_SIZE,
-        'COLUMNS': columns,
-        'FEATURE_IMPORTANCES': fimp,
-        'MAPE_TEST_SET' : MAPE_test_set,
-        '2_ND_BEST_MAPE' : sec_best_MAPE,
-        '2_ND_BEST_PARAMS' : json.dumps(sec_best_params, indent=0),
-        'MAPE_TRAIN_SET' : MAPE_train_set
-    }
-)
+print("Hyperparameters:")
+print("N_ESTIMATORS:", N_ESTIMATORS)
+print("MAX_DEPTH: ", MAX_DEPTH)
+print("LEARNING_RATE: ", LEARNING_RATE)
+print("MIN_DATA_IN_LEAF: ", MIN_DATA_IN_LEAF)
+print()
