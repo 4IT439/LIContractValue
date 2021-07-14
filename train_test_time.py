@@ -9,12 +9,20 @@ import datetime
 import pickle
 import time
 import datetime
+import sys
 
 
 N_ESTIMATORS = 8514
 MAX_DEPTH = 8
 LEARNING_RATE = 0.06869888172491326
 MIN_DATA_IN_LEAF = 20
+
+if len(sys.argv) == 5:
+    N_ESTIMATORS = int(sys.argv[1])
+    MAX_DEPTH = int(sys.argv[2])
+    LEARNING_RATE = float(sys.argv[3])
+    MIN_DATA_IN_LEAF = int(sys.argv[4])
+    print(sys.argv[1:])
 
 #Load the file containing variables [X_train, y_train, X_test, y_test]
 import pickle
