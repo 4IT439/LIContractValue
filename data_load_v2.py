@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pandas as pd 
 import numpy as np
 from statistics import mean
@@ -12,7 +13,7 @@ import pickle #load data in binary format
 
 
 #load ir 
-df_ir = pd.read_csv('nss_tau2.csv')
+df_ir = pd.read_csv('nss_tau2.CSV')
 # set #sc number as index 
 df_ir  = df_ir.set_index('scnum')
 df_ir.head()
@@ -20,34 +21,34 @@ df_ir.drop('Unnamed: 0', axis = 1, inplace = True)
 
 
 # load all files
-df1 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_0001-0200.csv')
-df2 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_0201-0500.csv')
-df3 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_0501-0700.csv')
-df4 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_0701-1000.csv')
-df5 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_1001-1300.csv')
-df6 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_1301-1600.csv')
-df7 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_1601-1900.csv')
-df8 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_1901-2236.csv')
-df9 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_6001-6300.csv')
-df10 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_6301-6600.csv')
-df11 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_6601-6900.csv')
-df12 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_6901-7200.csv')
-df13 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_7201-7500.csv')
-df14 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_7501-7800.csv')
-df15 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_7801-8236.csv')
-df16 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_9001-9300.csv')
-df17 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_9301-9700.csv')
-df18 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_9701-10000.csv')
-df19 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_10001-10300.csv')
-df20 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_10301-10600.csv')
-df21 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_10601-10900.csv')
-df22 = pd.read_csv('C:/users/onykiienko/Desktop/X_data_project/scen_10901-11236.csv')
+df1 = pd.read_csv('scen_0001-0200.CSV')
+df2 = pd.read_csv('scen_0201-0500.CSV')
+df3 = pd.read_csv('scen_0501-0700.CSV')
+df4 = pd.read_csv('scen_0701-1000.CSV')
+df5 = pd.read_csv('scen_1001-1300.CSV')
+df6 = pd.read_csv('scen_1301-1600.CSV')
+df7 = pd.read_csv('scen_1601-1900.CSV')
+df8 = pd.read_csv('scen_1901-2236.CSV')
+df9 = pd.read_csv('scen_6001-6300.CSV')
+df10 = pd.read_csv('scen_6301-6600.CSV')
+df11 = pd.read_csv('scen_6601-6900.CSV')
+df12 = pd.read_csv('scen_6901-7200.CSV')
+df13 = pd.read_csv('scen_7201-7500.CSV')
+df14 = pd.read_csv('scen_7501-7800.CSV')
+df15 = pd.read_csv('scen_7801-8236.CSV')
+df16 = pd.read_csv('scen_9001-9300.CSV')
+df17 = pd.read_csv('scen_9301-9700.CSV')
+df18 = pd.read_csv('scen_9701-10000.CSV')
+df19 = pd.read_csv('scen_10001-10300.CSV')
+df20 = pd.read_csv('scen_10301-10600.CSV')
+df21 = pd.read_csv('scen_10601-10900.CSV')
+df22 = pd.read_csv('scen_10901-11236.CSV')
 
 #making sample from them 
 df_final = pd.DataFrame()
 for i in range(1,23):
     #k = pd.DataFrame()
-    df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=0.2, replace = False, random_state = np.random.RandomState())])
+    df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=0.12, replace = False, random_state = np.random.RandomState())])
 # final df has 19 721 038 rows 
 df_final.head()
 # changing columns from cap to lower

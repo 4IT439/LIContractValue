@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python3
 import pandas as pd 
 import numpy as np
 from statistics import mean
@@ -50,11 +50,11 @@ print(MAPE_test0)
 
 
 # Split the dataset into training_validation and testing part
-# 95 : 5 
+# 80 : 20 
 
 from sklearn.model_selection import train_test_split
 
-validation_ratio = 0.05
+validation_ratio = 0.2
 
 X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split( 
     X_train, y_train,
@@ -64,12 +64,12 @@ X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split(
 
 # Setup params grid
 # initial ranges
-GRID_SIZE = 2
-N_ESTIMATORS_MIN = 200
-N_ESTIMATORS_MAX = 900
-MAX_DEPTH_MIN = 3
-MAX_DEPTH_MAX = 8
-LEARNING_RATE_COEF_MIN = -3
+GRID_SIZE = 5
+N_ESTIMATORS_MIN = 9000
+N_ESTIMATORS_MAX = 20000
+MAX_DEPTH_MIN = 4
+MAX_DEPTH_MAX = 12
+LEARNING_RATE_COEF_MIN = -1
 LEARNING_RATE_COEF_MAX = -0.5
 MIN_DATA_IN_LEAF_MIN = 20
 MIN_DATA_IN_LEAF_MAX = 20
@@ -160,7 +160,7 @@ import requests, datetime, json
 requests.post(
     "https://sheet.best/api/sheets/6a3a81b3-be98-409b-9d40-8de4e0b3ee26",
     json={
-       'Name': NAME,
+        'NAME': NAME,
         'TEST': 'VECTOR',
         'RMSE': 'N/A',
         'DATETIME': datetime.datetime.now().isoformat(),
