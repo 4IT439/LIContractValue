@@ -11,6 +11,9 @@ from sklearn.model_selection import train_test_split
 
 import pickle #load data in binary format
 
+FRAC = 0.12
+T_SET_RATIO = 0.2
+
 
 #load ir 
 df_ir = pd.read_csv('nss_tau2.CSV')
@@ -48,7 +51,7 @@ df22 = pd.read_csv('scen_10901-11236.CSV')
 df_final = pd.DataFrame()
 for i in range(1,23):
     #k = pd.DataFrame()
-    df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=0.12, replace = False, random_state = np.random.RandomState())])
+    df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=FRAC, replace = False, random_state = np.random.RandomState())])
 # final df has 19 721 038 rows 
 df_final.head()
 # changing columns from cap to lower
@@ -88,7 +91,7 @@ SEED = 500
 X_train, X_test, y_train, y_test= train_test_split(
     df_merged, #explanatory
     target, #response
-    test_size=0.2, #hold out size
+    test_size=T_SET_RATIO, #hold out size
     random_state=SEED
     )
 
