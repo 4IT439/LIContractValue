@@ -13,6 +13,7 @@ import pickle #load data in binary format
 
 FRAC = 0.12
 T_SET_RATIO = 0.2
+STAND = False
 
 
 #load ir 
@@ -66,10 +67,11 @@ target = df_merged['pv_cf_rdr'].copy()
 df_merged = df_merged.drop(['pv_cf_rdr'], axis = 1)
 df_merged.head()
 # std variable cv_ps_0_std
-mm = mean(df_merged['cv_ps_0'])
-std  = math.sqrt(st.variance(df_merged['cv_ps_0']))
-df_merged['cv_ps_0_std'] = df_merged['cv_ps_0'].apply(lambda x: (x-mm/std))
-df_merged.head()
+if STAND:
+    mm = mean(df_merged['cv_ps_0'])
+    std  = math.sqrt(st.variance(df_merged['cv_ps_0']))
+    df_merged['cv_ps_0_std'] = df_merged['cv_ps_0'].apply(lambda x: (x-mm/std))
+    df_merged.head()
 
 # count month between two dates
 def diff_month(d1, d2):
@@ -84,7 +86,8 @@ df_merged['cnt_months'] = df_merged['inc_date_ct'].apply(lambda x: diff_month(cd
 df_merged.head()
 
 # drop all columns thay are not used
-df_merged = df_merged.drop(['inc_date', 'inc_date_ct', 'cv_ps_0'], axis = 1) 
+df_merged = df_merged.drop((['inc_date', 'inc_date_ct', 'cv_ps_0'] if STAND==True \
+    else ['inc_date', 'inc_date_ct']), axis = 1) 
 df_merged.head()
 
 SEED = 500
