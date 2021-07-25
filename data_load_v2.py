@@ -11,8 +11,8 @@ from sklearn.model_selection import train_test_split
 
 import pickle #load data in binary format
 
-FRAC = 0.12
-T_SET_RATIO = 0.2
+FRAC = 0.1
+T_SET_RATIO = 0.05
 STAND = False
 
 
@@ -47,10 +47,17 @@ df19 = pd.read_csv('scen_10001-10300.CSV')
 df20 = pd.read_csv('scen_10301-10600.CSV')
 df21 = pd.read_csv('scen_10601-10900.CSV')
 df22 = pd.read_csv('scen_10901-11236.CSV')
+df23 = pd.read_csv('scen_12001-12300.CSV')
+df24 = pd.read_csv('scen_12301-12600.CSV')
+df25 = pd.read_csv('scen_12601-12900.CSV')
+df26 = pd.read_csv('scen_12901-13200.CSV')
+df27 = pd.read_csv('scen_13201-13500.CSV')
+df28 = pd.read_csv('scen_13501-13800.CSV')
+df29 = pd.read_csv('scen_13801-14236.CSV')
 
 #making sample from them 
 df_final = pd.DataFrame()
-for i in range(1,23):
+for i in range(1,30):
     #k = pd.DataFrame()
     df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=FRAC, replace = False, random_state = np.random.RandomState())])
 # final df has 19 721 038 rows 
