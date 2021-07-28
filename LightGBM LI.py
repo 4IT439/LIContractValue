@@ -131,19 +131,24 @@ sec_best_fit_no = best_fit_order[1]
 low_MAPE = grid.iloc[best_fit_no]['MAPE']
 best_params = grid.iloc[best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
 train_size = X_train_valid.shape[0]
+v_set_ratio = X_test_valid.shape[0] / (X_train_valid.shape[0] + X_test_valid.shape[0])
+t_set_ratio = X_test.shape[0] / (X_train.shape[0] + X_test.shape[0])
 columns = str(X_train_valid.columns.values)
 fimp = grid.iloc[best_fit_no]['FIMP']
 
 y_pred = lgbm_list[best_fit_no].predict(X_test)
 MAPE_test_set = mean_absolute_percentage_error(y_test, y_pred)
 
-sec_best_params = grid.iloc[sec_best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
+# sec_best_params = grid.iloc[sec_best_fit_no].drop('MAPE').drop('FIMP').astype(str).to_dict()
+sec_best_params = 'N/A'
 
-y_pred = lgbm_list[sec_best_fit_no].predict(X_test_valid)
-sec_best_MAPE = mean_absolute_percentage_error(y_test_valid, y_pred)
+# y_pred = lgbm_list[sec_best_fit_no].predict(X_test_valid)
+# sec_best_MAPE = mean_absolute_percentage_error(y_test_valid, y_pred)
+sec_best_MAPE = 'N/A'
 
-y_pred = lgbm_list[best_fit_no].predict(X_train_valid)
-MAPE_train_set = mean_absolute_percentage_error(y_train_valid, y_pred)
+# y_pred = lgbm_list[best_fit_no].predict(X_train_valid)
+# MAPE_train_set = mean_absolute_percentage_error(y_train_valid, y_pred)
+MAPE_train_set = 'N/A'
 
 print(low_MAPE)
 print(best_params)
@@ -173,6 +178,8 @@ requests.post(
         'LOW_RMSE': 'N/A',
         'MAPESCORE': low_MAPE,
         'N_ROWS_TRAIN': train_size,
+        'V_SET_RATIO': v_set_ratio,
+        'T_SET_RATIO': t_set_ratio,
         'GRID_SIZE': GRID_SIZE,
         'COLUMNS': columns,
         'FEATURE_IMPORTANCES': fimp,
