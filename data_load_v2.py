@@ -64,7 +64,7 @@ df36 = pd.read_csv('scen_13801-14236.CSV')
 
 #making sample from them 
 df_final = pd.DataFrame()
-for i in range(1,36):
+for i in range(1,37):
     #k = pd.DataFrame()
     df_final  = pd.concat([df_final, eval('df'+str(i)).sample(frac=FRAC, replace = False, random_state = np.random.RandomState())])
 # final df has 19 721 038 rows 
