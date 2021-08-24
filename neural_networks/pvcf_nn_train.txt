@@ -1,2 +1,0 @@
-Example of running:
-python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --train_size 0.75 --val_size 0.25 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 1 -p 5 -o out
