@@ -37,6 +37,8 @@ The script used for a training of a sequential model - neural network - with par
   - default='5'
 - `-o` / `--output_file` - prefix of the name of a output file.
   - default='out'
+- `-c` / `--ncpus` - maximum number of cpus allowed to use for Tensorflow.
+  - default='4'
 
 **Example of running:**
 `python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --train_size 0.75 --val_size 0.25 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 100 -p 5 -o out`

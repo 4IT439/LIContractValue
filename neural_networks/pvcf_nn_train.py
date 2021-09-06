@@ -10,6 +10,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, Dropout
 from tensorflow.keras.optimizers import Adam
@@ -18,22 +19,27 @@ from tensorflow.keras.callbacks import EarlyStopping
 # parse arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-b', '--basedir', help='Directory where file with source data is stored.')
-parser.add_argument('-f', '--filename', help='Name of a file with source data.')
-parser.add_argument('-a', '--architecture', help='Architecture of the NN in a list where elements are number of neurons in the layers.')
-parser.add_argument('--frac', help='A fraction of the original data used for training and validation.')
-parser.add_argument('--train_size', help='A fraction of the data used for training.')
-parser.add_argument('--val_size', help='A fraction of the data used for validation during evaluation.')
-parser.add_argument('--activation', help='Activation function for hidden layers.')
-parser.add_argument('--optimizer', help='Optimizer used for the model.')
-parser.add_argument('-l', '--loss', help='Loss function for hidden layers.')
-parser.add_argument('--fit_val_split', help='A fraction of the training data used as validation data during the training of the model.')
-parser.add_argument('--batch', help='Number of data samples used for one forward and backward pass during the training.')
-parser.add_argument('-e', '--epochs', help='A maximum number of epochs of training, in case that early stop wont be executed.')
-parser.add_argument('-p', '--patience', help='Number of epochs with no improvement after which training will be stopped.')
-parser.add_argument('-o', '--output_file', help='Name of a output file.')
+parser.add_argument('-b', '--basedir', help='Directory where file with source data is stored.', default='./data/')
+parser.add_argument('-f', '--filename', help='Name of a file with source data.', default='df_merged_train_test.pickle')
+parser.add_argument('-a', '--architecture', help='Architecture of the NN in a list where elements are number of neurons in the layers.', default='[256,256,256,1]')
+parser.add_argument('--frac', help='A fraction of the original data used for training and validation.', default='0.2')
+parser.add_argument('--train_size', help='A fraction of the data used for training.', default='0.75')
+parser.add_argument('--val_size', help='A fraction of the data used for validation during evaluation.', default='0.25')
+parser.add_argument('--activation', help='Activation function for hidden layers.', default='relu')
+parser.add_argument('--optimizer', help='Optimizer used for the model.', default='Adam')
+parser.add_argument('-l', '--loss', help='Loss function for hidden layers.', default='mse')
+parser.add_argument('--fit_val_split', help='A fraction of the training data used as validation data during the training of the model.', default='0.25')
+parser.add_argument('--batch', help='Number of data samples used for one forward and backward pass during the training.', default='256')
+parser.add_argument('-e', '--epochs', help='A maximum number of epochs of training, in case that early stop wont be executed.', default='3')
+parser.add_argument('-p', '--patience', help='Number of epochs with no improvement after which training will be stopped.', default='5')
+parser.add_argument('-o', '--output_file', help='Name of a output file.', default='out')
+parser.add_argument('-c', '--ncpus', help='Maximum number of cpus allowed to use for Tensorflow.', default='4')
 
 args=parser.parse_args()
+
+# configure tensorflow resource use
+tf.config.threading.set_inter_op_parallelism_threads(int(args.ncpus))
+tf.config.threading.set_intra_op_parallelism_threads(int(args.ncpus))
 
 TARGET = 'pv_cf_rdr'
 SEED = 420  # fix a seed for randomized functions
