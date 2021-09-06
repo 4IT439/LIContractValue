@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import time
 from datetime import datetime
@@ -16,10 +16,12 @@ from tensorflow.keras.layers import Dense, Activation, Dropout
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
+global_start = time.time()
+
 # parse arguments
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-b', '--basedir', help='Directory where file with source data is stored.', default='./data/')
+parser.add_argument('-b', '--basedir', help='Directory where file with source data is stored.', default='./')
 parser.add_argument('-f', '--filename', help='Name of a file with source data.', default='df_merged_train_test.pickle')
 parser.add_argument('-a', '--architecture', help='Architecture of the NN in a list where elements are number of neurons in the layers.', default='[256,256,256,1]')
 parser.add_argument('--frac', help='A fraction of the original data used for training and validation.', default='0.2')
@@ -176,6 +178,9 @@ y_pred_val = model.predict(X_val)
 end = time.time()
 eval_val_time = end - start
 
+global_end = time.time()
+global_time = global_end - global_start
+
 with open(OUTPUT_FILE, "w") as of:
     of.write('# train samples: ' + str(len(X_train)) + '\n')
     of.write('# val samples:   ' + str(len(X_val)) + '\n')
@@ -186,9 +191,11 @@ with open(OUTPUT_FILE, "w") as of:
     of.write('\n')
     
     of.write('History: ' + str(history.history) + '\n')
+    of.write('Epochs taken: ' + str(len(history.history['loss'])) + '\n')
     of.write('Fit time: [s]        ' + str(fit_time) + '\n')
     of.write('Eval train time [s]: ' + str(eval_train_time) + '\n')
     of.write('Eval val time [s]:   ' + str(eval_val_time) + '\n')
+    of.write('Global time [s]:     ' + str(global_time) + '\n')
     of.write('Train MAPE: ' + str(metrics.mean_absolute_percentage_error(y_train, y_pred_train)*100) + '\n')
     of.write('Val MAPE:   ' + str(metrics.mean_absolute_percentage_error(y_val, y_pred_val)*100) + '\n')
     of.write('MAE:  ' + str(metrics.mean_absolute_error(y_val, y_pred_val)) + '\n')  
