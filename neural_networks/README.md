@@ -37,7 +37,9 @@ The script used for a training of a sequential model - neural network - with par
   - default='5'
 - `-o` / `--output_file` - prefix of the name of a output file.
   - default='out'
-- `-c` / `--ncpus` - maximum number of cpus allowed to use for Tensorflow.
+- `--ncpus_inter` - maximum number of cpus allowed to use for Tensorflow globally.
+  - default='4'
+- `--ncpus_intra` - maximum number of cpus allowed to use for Tensorflow locally (within a single node).
   - default='4'
 
 **Example of running:**

@@ -35,13 +35,14 @@ parser.add_argument('--batch', help='Number of data samples used for one forward
 parser.add_argument('-e', '--epochs', help='A maximum number of epochs of training, in case that early stop wont be executed.', default='3')
 parser.add_argument('-p', '--patience', help='Number of epochs with no improvement after which training will be stopped.', default='5')
 parser.add_argument('-o', '--output_file', help='Name of a output file.', default='out')
-parser.add_argument('-c', '--ncpus', help='Maximum number of cpus allowed to use for Tensorflow.', default='4')
+parser.add_argument('--ncpus_inter', help='Maximum number of cpus allowed to use for Tensorflow globally.', default='4')
+parser.add_argument('--ncpus_intra', help='Maximum number of cpus allowed to use for Tensorflow locally (within a single node).', default='4')
 
 args=parser.parse_args()
 
 # configure tensorflow resource use
-tf.config.threading.set_inter_op_parallelism_threads(int(args.ncpus))
-tf.config.threading.set_intra_op_parallelism_threads(int(args.ncpus))
+tf.config.threading.set_inter_op_parallelism_threads(int(args.ncpus_inter))
+tf.config.threading.set_intra_op_parallelism_threads(int(args.ncpus_intra))
 
 TARGET = 'pv_cf_rdr'
 SEED = 420  # fix a seed for randomized functions
@@ -187,15 +188,21 @@ with open(OUTPUT_FILE, "w") as of:
     of.write('# test samples:  ' + str(len(X_test)) + '\n')
     of.write('\n')
     
+    of.write('Job configuration:' + '\n')
+    of.write('ncpus_inter: ' + args.ncpus_inter + '\n')
+    of.write('ncpus_intra: ' + args.ncpus_intra + '\n')
+    of.write('batch size: ' + args.batch + '\n')
+    of.write('\n')
+    
     model.summary(print_fn=lambda x: of.write(x + '\n'))
     of.write('\n')
     
     of.write('History: ' + str(history.history) + '\n')
     of.write('Epochs taken: ' + str(len(history.history['loss'])) + '\n')
-    of.write('Fit time: [s]        ' + str(fit_time) + '\n')
-    of.write('Eval train time [s]: ' + str(eval_train_time) + '\n')
-    of.write('Eval val time [s]:   ' + str(eval_val_time) + '\n')
-    of.write('Global time [s]:     ' + str(global_time) + '\n')
+    of.write('Fit time: [min]        ' + str(fit_time/60) + '\n')
+    of.write('Eval train time [min]: ' + str(eval_train_time/60) + '\n')
+    of.write('Eval val time [min]:   ' + str(eval_val_time/60) + '\n')
+    of.write('Global time [min]:     ' + str(global_time/60) + '\n')
     of.write('Train MAPE: ' + str(metrics.mean_absolute_percentage_error(y_train, y_pred_train)*100) + '\n')
     of.write('Val MAPE:   ' + str(metrics.mean_absolute_percentage_error(y_val, y_pred_val)*100) + '\n')
     of.write('MAE:  ' + str(metrics.mean_absolute_error(y_val, y_pred_val)) + '\n')  
