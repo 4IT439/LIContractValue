@@ -12,9 +12,9 @@ import datetime
 import sys
 
 
-N_ESTIMATORS = 8514
-MAX_DEPTH = 8
-LEARNING_RATE = 0.06869888172491326
+N_ESTIMATORS = 130000
+MAX_DEPTH = 11
+LEARNING_RATE = 0.2
 MIN_DATA_IN_LEAF = 20
 
 if len(sys.argv) == 5:
@@ -39,6 +39,22 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 # mape_scorer = make_scorer(mean_absolute_percentage_error, greater_is_better=False)
+
+# Split the dataset into training_validation and testing part
+# 80 : 20 
+
+from sklearn.model_selection import train_test_split
+
+validation_ratio = 0.2
+
+X_train_valid, X_test_valid, y_train_valid, y_test_valid = train_test_split( 
+    X_train, y_train,
+    test_size = validation_ratio, 
+    random_state = SEED
+    )
+
+X_train, X_test, y_train, y_test = \
+    X_train_valid, X_test_valid, y_train_valid, y_test_valid
 
 import lightgbm as lgb #pip3 install lightbm
 
