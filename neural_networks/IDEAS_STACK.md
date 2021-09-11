@@ -6,3 +6,5 @@ IDEAS STACK:
 - [x] pridat do vystupneho suboru konfiguraciu jobu
   - [x] pocet cpu (inter a intra)
   - [x] batch size
+- [x] aktualizovat v README priklad vystupneho suboru
+- [ ] prerobit eval train hitory na plotly

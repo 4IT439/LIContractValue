@@ -17,6 +17,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
 global_start = time.time()
+global_end = None
 
 # parse arguments
 parser = argparse.ArgumentParser()
@@ -49,7 +50,6 @@ SEED = 420  # fix a seed for randomized functions
 
 BASEDIR = args.basedir  # directory where file with source data is stored
 FILENAME = args.filename  # name of a file with source data
-OUTPUT_FILE = args.output_file + '_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
 FRAC = float(args.frac)  # a fraction of the original data used for training and validation 
 TRAIN_SIZE = float(args.train_size)  # a fraction of the data used for training
@@ -179,8 +179,8 @@ y_pred_val = model.predict(X_val)
 end = time.time()
 eval_val_time = end - start
 
-global_end = time.time()
-global_time = global_end - global_start
+OUTPUT_FILE = args.output_file  + '_' + str(int(int(args.ncpus_inter)/int(args.ncpus_intra))) \
+    + '_' + args.ncpus_intra + '_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
 
 with open(OUTPUT_FILE, "w") as of:
     of.write('# train samples: ' + str(len(X_train)) + '\n')
@@ -199,12 +199,14 @@ with open(OUTPUT_FILE, "w") as of:
     
     of.write('History: ' + str(history.history) + '\n')
     of.write('Epochs taken: ' + str(len(history.history['loss'])) + '\n')
-    of.write('Fit time: [min]        ' + str(fit_time/60) + '\n')
-    of.write('Eval train time [min]: ' + str(eval_train_time/60) + '\n')
-    of.write('Eval val time [min]:   ' + str(eval_val_time/60) + '\n')
-    of.write('Global time [min]:     ' + str(global_time/60) + '\n')
     of.write('Train MAPE: ' + str(metrics.mean_absolute_percentage_error(y_train, y_pred_train)*100) + '\n')
     of.write('Val MAPE:   ' + str(metrics.mean_absolute_percentage_error(y_val, y_pred_val)*100) + '\n')
     of.write('MAE:  ' + str(metrics.mean_absolute_error(y_val, y_pred_val)) + '\n')  
     of.write('MSE:  ' + str(metrics.mean_squared_error(y_val, y_pred_val)) + '\n')  
     of.write('RMSE: ' + str(np.sqrt(metrics.mean_squared_error(y_val, y_pred_val))) + '\n')
+    of.write('Fit time: [min]        ' + str(fit_time/60) + '\n')
+    of.write('Eval train time [min]: ' + str(eval_train_time/60) + '\n')
+    of.write('Eval val time [min]:   ' + str(eval_val_time/60) + '\n')
+    global_end = time.time()
+    global_time = global_end - global_start
+    of.write('Global time [min]:     ' + str(global_time/60) + '\n')
