@@ -38,6 +38,7 @@ parser.add_argument('-p', '--patience', help='Number of epochs with no improveme
 parser.add_argument('-o', '--output_file', help='Name of a output file.', default='out')
 parser.add_argument('--ncpus_inter', help='Maximum number of cpus allowed to use for Tensorflow globally.', default='4')
 parser.add_argument('--ncpus_intra', help='Maximum number of cpus allowed to use for Tensorflow locally (within a single node).', default='4')
+parser.add_argument('--export_predictions', help='Whether to export a file with predictions for validation data.', default='False')
 
 args=parser.parse_args()
 
@@ -64,6 +65,7 @@ MODEL_FIT_VAL_SPLIT = float(args.fit_val_split)  # a fraction of the training da
 BATCH_SIZE = int(args.batch)  # number of data samples used for one forward and backward pass during the training
 EPOCHS_MAX = int(args.epochs)  # a maximum number of epochs of training, in case that early stop wont be executed
 ES_PATIENCE = int(args.patience)  # number of epochs with no improvement after which training will be stopped
+EXPORT_PREDICTIONS = args.export_predictions
 
 # load preprocessed data
 df = pd.read_pickle(BASEDIR + FILENAME)
@@ -179,8 +181,23 @@ y_pred_val = model.predict(X_val)
 end = time.time()
 eval_val_time = end - start
 
-OUTPUT_FILE = args.output_file  + '_' + str(int(int(args.ncpus_inter)/int(args.ncpus_intra))) \
-    + '_' + args.ncpus_intra + '_' + datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+timestamp = datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+
+OUTPUT_FILE = args.output_file  + '_' + timestamp
+    
+# export file with predictions
+if EXPORT_PREDICTIONS == 'True':
+    OUTPUT_PREDICTIONS = args.output_file + '_predictions_' + timestamp
+    
+    df_predictions = pd.DataFrame()
+    y_true_series = pd.DataFrame(y_val)
+    y_pred_series = pd.DataFrame([item for sublist in y_pred_val for item in sublist])
+
+    y_true_series.reset_index(drop=True, inplace=True)
+    y_pred_series.reset_index(drop=True, inplace=True)
+    df_predictions['y_true'] = y_true_series
+    df_predictions['y_pred'] = y_pred_series
+    df_predictions.to_csv(OUTPUT_PREDICTIONS, index=False)
 
 with open(OUTPUT_FILE, "w") as of:
     of.write('# train samples: ' + str(len(X_train)) + '\n')

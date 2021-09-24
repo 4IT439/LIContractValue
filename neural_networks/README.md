@@ -41,20 +41,20 @@ The script used for a training of a sequential model - neural network - with par
   - default='4'
 - `--ncpus_intra` - maximum number of cpus allowed to use for Tensorflow locally (within a single node).
   - default='4'
+- `--export_predictions` - whether to export a file with predictions for validation data.
+  - default='False'
 
 **Example of running:**
-`python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --train_size 0.75 --val_size 0.25 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 100 -p 5 -o out --ncpus_inter 4 --ncpus_intra 4`
+`python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --train_size 0.75 --val_size 0.25 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 100 -p 5 -o out --ncpus_inter 4 --ncpus_intra 4 --export_predictions True`
 
-This will execute training of the neural network with the data in `pickle` format (`df_merged_train_test.pickle`) stored in the actual directory (`./`). The model will have input layer with 256 neurons (dealing possible difference in a number of the features in the data is secured), 2 hidden layers of 256 neurons each, and output layer of 1 neuron without the activation function (since it is a regression problem). 20% of the original training data will be used, from which 75% will serve as a training set and 25% as a validation set. `relu` function will be used as an activation function in the input layer and hidden layers. The model will be compiled with `Adam` optimizer and `mse` (mean squared error) as a loss function. `Batch` of 256 data points will be used in one pass during the training. Training will run for 100 `epochs` with `patience` of 5 epochs for early stopping. The `output` will be saved in the file with "out" prefix which will be followed with some of the job configuration values and the timestamp of the end of the job, delimited by "_" character. The Tensorflow will be limited with 4 cpus globally with maximum of 4 cpus within a single node.
+This will execute training of the neural network with the data in `pickle` format (`df_merged_train_test.pickle`) stored in the actual directory (`./`). The model will have input layer with 256 neurons (dealing possible difference in a number of the features in the data is secured), 2 hidden layers of 256 neurons each, and output layer of 1 neuron without the activation function (since it is a regression problem). 20% of the original training data will be used, from which 75% will serve as a training set and 25% as a validation set. `relu` function will be used as an activation function in the input layer and hidden layers. The model will be compiled with `Adam` optimizer and `mse` (mean squared error) as a loss function. `Batch` of 256 data points will be used in one pass during the training. Training will run for 100 `epochs` with `patience` of 5 epochs for early stopping. The `output` with the training and evaluation statistics will be saved in the file with "out" prefix which will be followed with some of the job configuration values and the timestamp of the end of the job, delimited by "_" character. A second output file - one with predictions - will be saved to a file with the same prefix that the previous one and will contain two columns - true and predicted target value for each sample from validation set. The Tensorflow will be limited with 4 cpus globally with maximum of 4 cpus within a single node.
 
 **Example of output:**
 
-Example name of the output file: `out_6_32_2021-09-10T22-33-30`.
+Example name of the output file: `out_2021-09-10T22-33-30`.
 
 A name of the output file consist of the following values:
 - given prefix,
-- number of nodes on which the job ran,
-- number of cpus dedicated on the single node,
 - timestamp of the end of the job,
 delimited by "_" character.
 
@@ -106,6 +106,36 @@ Global time [min]:     494.6127783497175
 ```
 
 An output file contains numbers of training, validation and test samples used in the execution, job configuration (given resources), informations about the model (layers and parameters), history of the training (list of values of training and validation loss function during the training), times elapsed while training and evaluating the model and various performance metrics.
+
+**Example of predictions file:**
+
+Example name of the output file: `out_predictions_2021-09-10T22-33-30`.
+
+```
+y_true,y_pred
+-115821.264904,-119294.56
+-67939.443203,-68778.42
+1569.292885,-477.37497
+-167447.782266,-163292.95
+-124257.423452,-125826.59
+-308250.246582,-310408.44
+9281.726914,10019.204
+-103398.421238,-97874.31
+-98017.382675,-97448.43
+...
+-38590.240099,-37963.68
+-150685.84767,-152547.66
+-154427.704847,-155155.58
+-75243.79394,-75227.72
+-104535.168481,-105675.02
+-78143.959917,-77925.42
+10687.23709,11103.448
+-780188.750392,-783215.5
+-103329.938404,-104489.086
+23748.806003,27756.816
+```
+
+Prediction file contains two columns. `y_pred` stores true values of target variable (`y`), `y_pred` stores a predicted ones.
 
 ## pvcf_nn.ipynb
 
