@@ -17,10 +17,6 @@ The script used for a training of a sequential model - neural network - with par
   - default='[256,256,256,1]'
 - `--frac` - a fraction of the original data used for training and validation.
   - default='0.2'
-- `--train_size` - a fraction of the data used for training.
-  - default='0.75'
-- `--val_size` - a fraction of the data used for validation during evaluation.
-  - default='0.25'
 - `--activation` - activation function for hidden layers.
   - default='relu'
 - `--optimizer` - optimizer used for the model.
@@ -45,9 +41,9 @@ The script used for a training of a sequential model - neural network - with par
   - default='False'
 
 **Example of running:**
-`python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --train_size 0.75 --val_size 0.25 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 100 -p 5 -o out --ncpus_inter 4 --ncpus_intra 4 --export_predictions True`
+`python ./pvcf_nn_train.py -b ./ -f df_merged_train_test.pickle -a [256,256,256,1] --frac 0.2 --activation relu --optimizer Adam -l mse --fit_val_split 0.25 --batch 256 -e 100 -p 5 -o out --ncpus_inter 4 --ncpus_intra 4 --export_predictions True --export_model True`
 
-This will execute training of the neural network with the data in `pickle` format (`df_merged_train_test.pickle`) stored in the actual directory (`./`). The model will have input layer with 256 neurons (dealing possible difference in a number of the features in the data is secured), 2 hidden layers of 256 neurons each, and output layer of 1 neuron without the activation function (since it is a regression problem). 20% of the original training data will be used, from which 75% will serve as a training set and 25% as a validation set. `relu` function will be used as an activation function in the input layer and hidden layers. The model will be compiled with `Adam` optimizer and `mse` (mean squared error) as a loss function. `Batch` of 256 data points will be used in one pass during the training. Training will run for 100 `epochs` with `patience` of 5 epochs for early stopping. The `output` with the training and evaluation statistics will be saved in the file with "out" prefix which will be followed with some of the job configuration values and the timestamp of the end of the job, delimited by "_" character. A second output file - one with predictions - will be saved to a file with the same prefix that the previous one and will contain two columns - true and predicted target value for each sample from validation set. The Tensorflow will be limited with 4 cpus globally with maximum of 4 cpus within a single node.
+This will execute training of the neural network with the data in `pickle` format (`df_merged_train_test.pickle`) stored in the actual directory (`./`). The model will have input layer with 256 neurons (dealing possible difference in a number of the features in the data is secured), 2 hidden layers of 256 neurons each, and output layer of 1 neuron without the activation function (since it is a regression problem). 20% of the original training data will be used for training. `relu` function will be used as an activation function in the input layer and hidden layers. The model will be compiled with `Adam` optimizer and `mse` (mean squared error) as a loss function. `Batch` of 256 data points will be used in one pass during the training. Training will run for 100 `epochs` with `patience` of 5 epochs for early stopping. The `output` with the training and evaluation statistics will be saved in the file with "out" prefix which will be followed with some of the job configuration values and the timestamp of the end of the job, delimited by "_" character. A second output file - one with predictions - will be saved to a file with the same prefix that the previous one and will contain two columns - true and predicted target value for each sample from validation set. A trained model will be exported too. The Tensorflow will be limited with 4 cpus globally with maximum of 4 cpus within a single node.
 
 **Example of output:**
 
@@ -136,6 +132,18 @@ y_true,y_pred
 ```
 
 Prediction file contains two columns. `y_pred` stores true values of target variable (`y`), `y_pred` stores a predicted ones.
+
+**Model output:**
+
+Example name of the output file: `out_model_2021-09-10T22-33-30`.
+
+This output file contains a trained tensorflow model. This model can be loaded in another application. 
+
+Example of loading:
+```python
+from tensorflow import keras
+model = keras.models.load_model('path/to/location')
+```
 
 ## pvcf_nn.ipynb
 
