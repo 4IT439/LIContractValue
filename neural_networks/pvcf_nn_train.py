@@ -37,6 +37,8 @@ parser.add_argument('--ncpus_inter', help='Maximum number of cpus allowed to use
 parser.add_argument('--ncpus_intra', help='Maximum number of cpus allowed to use for Tensorflow locally (within a single node).', default='4')
 parser.add_argument('--export_predictions', help='Whether to export a file with predictions for validation data.', default='False')
 parser.add_argument('--export_model', help='Whether to export a trained model.', default='False')
+parser.add_argument('--load_model', help='Path to the model to load.', default='')
+parser.add_argument('--initial_epoch', help='Epoch number from which training should start.', default='0')
 
 args=parser.parse_args()
 
@@ -63,6 +65,8 @@ EPOCHS_MAX = int(args.epochs)  # a maximum number of epochs of training, in case
 ES_PATIENCE = int(args.patience)  # number of epochs with no improvement after which training will be stopped
 EXPORT_PREDICTIONS = args.export_predictions
 EXPORT_MODEL = args.export_model
+LOAD_MODEL = args.load_model
+INITIAL_EPOCH = int(args.initial_epoch)
 
 # load preprocessed data
 df = pd.read_pickle(BASEDIR + FILENAME)
@@ -125,16 +129,18 @@ X_train = pd.concat([X_train_scaled, X_train_nottoscale], axis=1)
 X_val = pd.concat([X_val_scaled, X_val_nottoscale], axis=1)
 
 # define model
-model = Sequential()
-for layer in range(LAYERS):
-    if layer == 0:
-        model.add(Dense(ARCHITECTURE[layer], activation=ACTIVATION, input_shape=(15,)))
-    elif layer > 0 and layer < LAYERS-1:
-        model.add(Dense(ARCHITECTURE[layer], activation=ACTIVATION))
-    else:
-        model.add(Dense(ARCHITECTURE[layer]))
-
-model.compile(optimizer=OPTIMIZER, loss=LOSS)
+if LOAD_MODEL == '':
+    model = Sequential()
+    for layer in range(LAYERS):
+        if layer == 0:
+            model.add(Dense(ARCHITECTURE[layer], activation=ACTIVATION, input_shape=(15,)))
+        elif layer > 0 and layer < LAYERS-1:
+            model.add(Dense(ARCHITECTURE[layer], activation=ACTIVATION))
+        else:
+            model.add(Dense(ARCHITECTURE[layer]))
+    model.compile(optimizer=OPTIMIZER, loss=LOSS)
+elif LOAD_MODEL != '':
+    model = tf.keras.models.load_model(LOAD_MODEL)
 
 # early stopping definition
 es = EarlyStopping(monitor='loss', mode='min', verbose=1, patience=ES_PATIENCE)
@@ -148,7 +154,7 @@ history = model.fit(
     validation_split=MODEL_FIT_VAL_SPLIT,
     batch_size=BATCH_SIZE,
     epochs=EPOCHS_MAX,
-    initial_epoch=0,
+    initial_epoch=INITIAL_EPOCH,
     callbacks=[es]
 )
 end = time.time()
@@ -205,7 +211,7 @@ with open(OUTPUT_FILE, "w") as of:
     of.write('\n')
     
     of.write('History: ' + str(history.history) + '\n')
-    of.write('Epochs taken: ' + str(len(history.history['loss'])) + '\n')
+    of.write('Epochs taken: ' + str(len(history.history['loss'])) + ' (initial epoch was: ' + str(INITIAL_EPOCH) + ')\n')
     of.write('Train MAPE: ' + str(metrics.mean_absolute_percentage_error(y_train, y_pred_train)*100) + '\n')
     of.write('Val MAPE:   ' + str(metrics.mean_absolute_percentage_error(y_val, y_pred_val)*100) + '\n')
     of.write('Percentage error for portfolio: ' + str(percentage_error) + '%\n')
